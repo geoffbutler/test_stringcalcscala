@@ -26,7 +26,7 @@ class StringCalc {
   private def ParseWithCustomDelim(input : String) : List[Int] = {        
     val delim = input.substring(customDelimPrefix.length, 3); // skip '//' and take 1 char    
     val numsPart = input.substring(customDelimPrefix.length + 2); // skip '//' + 1 char + '\n' and take rest
-    numsPart.split(delim).map(s => s.toInt).toList
+    numsPart.split(delim).map(_.toInt).toList
   }    
 
 
@@ -34,7 +34,7 @@ class StringCalc {
     defaultDelimsRegex.findFirstIn(input).isDefined
 
   private def ParseWithDefaultDelims(input : String) : List[Int] =
-    defaultDelimsRegex.split(input).map(s => s.toInt).toList
+    defaultDelimsRegex.split(input).map(_.toInt).toList
 
   private object Int {
     def unapply(s : String) : Option[Int] = try {
@@ -46,9 +46,9 @@ class StringCalc {
 
 
   private def AssertNoNegatives(nums : List[Int]) {    
-    val ltZeroNums = nums.filter(n => n < 0)
-    if (ltZeroNums.nonEmpty ) {      
-      val ltZeroNumList = ltZeroNums.map(n => n.toString).mkString(",")
+    val ltZeroNums = nums.filter(_ < 0)
+    if (ltZeroNums.nonEmpty) {      
+      val ltZeroNumList = ltZeroNums.map(_.toString).mkString(",")
       val message = "negatives not allowed: " + ltZeroNumList
       throw new java.lang.IllegalArgumentException(message)
     }
