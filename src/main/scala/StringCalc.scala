@@ -47,8 +47,7 @@ class StringCalc {
 
   private def AssertNoNegatives(nums : List[Int]) {    
     val ltZeroNums = nums.filter(n => n < 0)
-    if (ltZeroNums.nonEmpty ) {
-      println("ltZeroNums len > 0")
+    if (ltZeroNums.nonEmpty ) {      
       val ltZeroNumList = ltZeroNums.map(n => n.toString).mkString(",")
       val message = "negatives not allowed: " + ltZeroNumList
       throw new java.lang.IllegalArgumentException(message)
