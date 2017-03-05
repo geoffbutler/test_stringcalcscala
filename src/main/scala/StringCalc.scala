@@ -1,33 +1,78 @@
 package main.scala
 
+import java.util.regex.Pattern
+import scala.collection.mutable.ListBuffer
+
 class StringCalc {
   
   private val defaultDelimsRegex = "(,|\n)".r
   private val customDelimPrefix = "//"
+  private val customMultiCharDelimPrefix = "["
+  private val customMultiCharDelimSuffix = "]"
+  private val customMultiCharDelimRegex = "\\[{1}[^\\]\\[]*\\]{1}".r
 
   def Sum(input : String) : Int = {
-    val nums = ParseInput(input)
+    val nums = ParseInput(input)    
     AssertNoNegatives(nums)
-    nums.sum
+    val filteredNums = FilterInput(nums)
+    filteredNums.sum
   }
+
 
   private def ParseInput(input : String) : List[Int] = input match {
     case "" => List(0)
-    case x if UsesCustomDelim(x) => ParseWithCustomDelim(x)    
+    case x if UsesCustomSingleDelim(x) => ParseWithCustomSingleDelim(x)    
+    case x if UsesCustomMultiDelim(x) => ParseWithCustomMultiDelim(x)    
     case x if UsesDefaultDelims(x) => ParseWithDefaultDelims(x)
     case Int(x) => List(x)
     case _ => List(0)
   }
 
 
-  private def UsesCustomDelim(input : String) : Boolean = 
-    input.startsWith(customDelimPrefix)
+  private def UsesCustomSingleDelim(input : String) : Boolean = 
+    input.startsWith(customDelimPrefix) && // starts with '//'
+    !input.startsWith(customDelimPrefix + customMultiCharDelimPrefix) // but does not start with '//['
 
-  private def ParseWithCustomDelim(input : String) : List[Int] = {        
-    val delim = input.substring(customDelimPrefix.length, 3); // skip '//' and take 1 char    
-    val numsPart = input.substring(customDelimPrefix.length + 2); // skip '//' + 1 char + '\n' and take rest
-    numsPart.split(delim).map(_.toInt).toList
-  }    
+  private def ParseWithCustomSingleDelim(input : String) : List[Int] = { 
+    val delimStartIdx = 2               // skip '//'
+    val delimEndIdx = 3                 // '//' + single char
+    val delimPrefixLength = (2 + 1 + 1) // skip '\n' and take rest
+
+    val delim = input.substring(delimStartIdx, delimEndIdx)      
+    val numsPart = input.substring(delimPrefixLength)      
+    val numStrings = numsPart.split(Pattern.quote(delim))      
+
+    numStrings.map(_.toInt).toList
+  }
+
+
+  private def UsesCustomMultiDelim(input : String) : Boolean = 
+    input.startsWith(customDelimPrefix + customMultiCharDelimPrefix) // starts with '//['
+
+  private def ParseWithCustomMultiDelim(input : String) : List[Int] = {     
+    val delimMatches = customMultiCharDelimRegex.findAllIn(Pattern.quote(input))
+
+    // get delims
+    val delims = ListBuffer[String]()
+    var delimPrefixLength = 2 // skip '//'    
+    for (dm <- delimMatches) {
+      val delim = dm.substring(1, dm.indexOf(customMultiCharDelimSuffix)) // between '[' and ']'
+      delimPrefixLength += (1 + delim.length + 1) // '[' + delim len + ']'
+      delims += delim
+    }
+    delimPrefixLength += 1 // skip '\n'
+
+    // build pattern // TODO: could use StringBuilder here
+    var multiDelimPattern = "("        
+    multiDelimPattern += delims.map(Pattern.quote).mkString("|")
+    multiDelimPattern += ")"
+
+    // get parts
+    val numsPart = input.substring(delimPrefixLength)
+    val numStrings = numsPart.split(multiDelimPattern)
+    
+    numStrings.map(_.toInt).toList
+  }
 
 
   private def UsesDefaultDelims(input : String) : Boolean =
@@ -54,4 +99,7 @@ class StringCalc {
     }
   }
 
+
+  private def FilterInput(nums : List[Int]) : List[Int] = 
+    nums.filter(_ < 1001).toList 
 }

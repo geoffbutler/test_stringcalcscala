@@ -60,4 +60,23 @@ class StringCalcSpec extends FunSuite {
     }
     assert(ex.getMessage == "negatives not allowed: -1,-2")
   }
+
+  test("StringCalc.Sum should ignore paramters greater than 1000") {
+    val calc = new StringCalc()
+    assert(calc.Sum("2,1001") == 2)
+    assert(calc.Sum("1000,1") == 1001)
+    assert(calc.Sum("1001,2") == 2)
+  }
+
+  test("StringCalc.Sum should allow multiple character delimiters of any length") {
+    val calc = new StringCalc()
+    assert(calc.Sum("//[***]\n1***2***3") == 6)
+    assert(calc.Sum("//[###]\n1###2###3") == 6)
+  }
+
+  test("StringCalc.Sum allows multiple multiple character delimiters") {
+    val calc = new StringCalc()
+    assert(calc.Sum("//[*][%]\n1*2%3") == 6)
+    assert(calc.Sum("//[***][%%%]\n1***2%%%3") == 6)
+  }
 }
