@@ -11,32 +11,32 @@ class StringCalc {
   private val customMultiCharDelimSuffix = "]"
   private val customMultiCharDelimRegex = "\\[{1}[^\\]\\[]*\\]{1}".r
 
-  def Sum(input : String) : Int = {
-    val nums = ParseInput(input)    
-    AssertNoNegatives(nums)
-    val filteredNums = FilterInput(nums)
+  def sum(input : String) : Int = {
+    val nums = parseInput(input)
+    assertNoNegatives(nums)
+    val filteredNums = filterInput(nums)
     filteredNums.sum
   }
 
 
-  private def ParseInput(input : String) : List[Int] = input match {
+  private def parseInput(input : String) : List[Int] = input match {
     case "" => List(0)
-    case x if UsesCustomSingleDelim(x) => ParseWithCustomSingleDelim(x)    
-    case x if UsesCustomMultiDelim(x) => ParseWithCustomMultiDelim(x)    
-    case x if UsesDefaultDelims(x) => ParseWithDefaultDelims(x)
+    case x if usesCustomSingleDelim(x) => parseWithCustomSingleDelim(x)
+    case x if usesCustomMultiDelim(x) => parseWithCustomMultiDelim(x)
+    case x if usesDefaultDelims(x) => parseWithDefaultDelims(x)
     case Int(x) => List(x)
     case _ => List(0)
   }
 
 
-  private def UsesCustomSingleDelim(input : String) : Boolean = 
+  private def usesCustomSingleDelim(input : String) : Boolean =
     input.startsWith(customDelimPrefix) && // starts with '//'
     !input.startsWith(customDelimPrefix + customMultiCharDelimPrefix) // but does not start with '//['
 
-  private def ParseWithCustomSingleDelim(input : String) : List[Int] = { 
+  private def parseWithCustomSingleDelim(input : String) : List[Int] = {
     val delimStartIdx = 2               // skip '//'
     val delimEndIdx = 3                 // '//' + single char
-    val delimPrefixLength = (2 + 1 + 1) // skip '\n' and take rest
+    val delimPrefixLength = 2 + 1 + 1 // skip '\n' and take rest
 
     val delim = input.substring(delimStartIdx, delimEndIdx)      
     val numsPart = input.substring(delimPrefixLength)      
@@ -46,10 +46,10 @@ class StringCalc {
   }
 
 
-  private def UsesCustomMultiDelim(input : String) : Boolean = 
+  private def usesCustomMultiDelim(input : String) : Boolean =
     input.startsWith(customDelimPrefix + customMultiCharDelimPrefix) // starts with '//['
 
-  private def ParseWithCustomMultiDelim(input : String) : List[Int] = {     
+  private def parseWithCustomMultiDelim(input : String) : List[Int] = {
     val delimMatches = customMultiCharDelimRegex.findAllIn(Pattern.quote(input))
 
     // get delims
@@ -75,10 +75,10 @@ class StringCalc {
   }
 
 
-  private def UsesDefaultDelims(input : String) : Boolean =
+  private def usesDefaultDelims(input : String) : Boolean =
     defaultDelimsRegex.findFirstIn(input).isDefined
 
-  private def ParseWithDefaultDelims(input : String) : List[Int] =
+  private def parseWithDefaultDelims(input : String) : List[Int] =
     defaultDelimsRegex.split(input).map(_.toInt).toList
 
   private object Int {
@@ -90,7 +90,7 @@ class StringCalc {
   }
 
 
-  private def AssertNoNegatives(nums : List[Int]) {    
+  private def assertNoNegatives(nums : List[Int]) {
     val ltZeroNums = nums.filter(_ < 0)
     if (ltZeroNums.nonEmpty) {      
       val ltZeroNumList = ltZeroNums.map(_.toString).mkString(",")
@@ -100,6 +100,6 @@ class StringCalc {
   }
 
 
-  private def FilterInput(nums : List[Int]) : List[Int] = 
-    nums.filter(_ < 1001).toList 
+  private def filterInput(nums : List[Int]) : List[Int] =
+    nums.filter(_ < 1001)
 }
